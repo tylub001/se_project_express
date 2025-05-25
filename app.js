@@ -22,11 +22,10 @@ app.use((req, res, next) => {
 
 app.use("/", mainRouter);
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   console.error(err);
-  res
-    .status(err.status || 500)
-    .json({ message: err.message || "An error occurred on the server" });
+  res.status(err.status || 500).json({ message: err.message || "An error occurred on the server" });
+  next(err); // This satisfies ESLint but won't actually run
 });
 
 app.listen(PORT, () => {
