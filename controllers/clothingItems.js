@@ -6,12 +6,11 @@ const getClothingItems = (req, res) => {
     .then((items) => res.status(200).send(items))
     .catch((err) => {
       console.error(err);
-      res.status(SERVER_ERROR).send({ message: err.message });
+      return res.status(SERVER_ERROR).send({ message: err.message });
     });
 };
 
 const createClothingItem = (req, res, next) => {
-  console.log(req.user._id);
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
@@ -36,11 +35,11 @@ const getClothingItem = (req, res) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).send({ message: err.message });
-      } else if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
-      } else {
-        return res.status(SERVER_ERROR).send({ message: err.message });
       }
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: err.message });
+      }
+      return res.status(SERVER_ERROR).send({ message: err.message });
     });
 };
 
@@ -56,7 +55,7 @@ const updateClothingItem = (req, res) => {
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).send({ message: err.message });
       }
-      res.status(SERVER_ERROR).send({ message: err.message });
+      return res.status(SERVER_ERROR).send({ message: err.message });
     });
 };
 
@@ -65,23 +64,21 @@ const deleteClothingItem = (req, res) => {
 
   ClothingItem.findByIdAndDelete(itemId)
     .orFail()
-    .then((deletedItem) => {
+    .then((deletedItem) =>
       res
         .status(200)
-        .send({ message: "Item deleted successfully", deletedItem });
-    })
+        .send({ message: "Item deleted successfully", deletedItem })
+    )
     .catch((err) => {
       console.error(err);
 
       if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
-
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
       }
-
-      res.status(SERVER_ERROR).send({ message: err.message });
+      return res.status(SERVER_ERROR).send({ message: err.message });
     });
 };
 
