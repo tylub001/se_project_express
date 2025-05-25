@@ -37,7 +37,7 @@ const getUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).json({ message: MESSAGES.NOT_FOUND });
+        return res.status(NOT_FOUND).json({ message: MESSAGES.USER_NOT_FOUND });
       }
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).json({ message: MESSAGES.BAD_REQUEST });

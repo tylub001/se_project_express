@@ -1,12 +1,17 @@
 const ClothingItem = require("../models/clothingItem");
-const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  SERVER_ERROR,
+  MESSAGES,
+} = require("../utils/errors");
 
 const getClothingItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
     .catch((err) => {
       console.error(err);
-      return res.status(SERVER_ERROR).send({ message: err.message });
+      return res.status(SERVER_ERROR).json({ message: MESSAGES.SERVER_ERROR });
     });
 };
 
@@ -19,9 +24,9 @@ const createClothingItem = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return next({ status: 400, message: err.message });
+        return next({ status: BAD_REQUEST, message: MESSAGES.BAD_REQUEST });
       }
-      return next({ status: 500, message: "An error occurred on the server" });
+      return next({ status: SERVER_ERROR, message: MESSAGES.SERVER_ERROR });
     });
 };
 
@@ -34,12 +39,12 @@ const getClothingItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: err.message });
+        return res.status(NOT_FOUND).json({ message: MESSAGES.NOT_FOUND });
       }
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res.status(BAD_REQUEST).json({ message: MESSAGES.BAD_REQUEST });
       }
-      return res.status(SERVER_ERROR).send({ message: err.message });
+      return res.status(SERVER_ERROR).json({ message: MESSAGES.SERVER_ERROR });
     });
 };
 
@@ -53,9 +58,9 @@ const updateClothingItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: err.message });
+        return res.status(BAD_REQUEST).json({ message: MESSAGES.BAD_REQUEST });
       }
-      return res.status(SERVER_ERROR).send({ message: err.message });
+      return res.status(SERVER_ERROR).json({ message: MESSAGES.SERVER_ERROR });
     });
 };
 
@@ -73,12 +78,12 @@ const deleteClothingItem = (req, res) => {
       console.error(err);
 
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).send({ message: "Item not found" });
+        return res.status(NOT_FOUND).json({ message: MESSAGES.ITEM_NOT_FOUND });
       }
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
+        return res.status(BAD_REQUEST).json({ message: MESSAGES.BAD_REQUEST });
       }
-      return res.status(SERVER_ERROR).send({ message: err.message });
+      return res.status(SERVER_ERROR).json({ message: MESSAGES.SERVER_ERROR });
     });
 };
 
@@ -89,7 +94,7 @@ const likeItem = (req, res, next) => {
     { new: true }
   )
     .orFail(() => {
-      const error = new Error("Clothing item not found");
+      const error = new Error(MESSAGES.ITEM_NOT_FOUND);
       error.status = NOT_FOUND;
       throw error;
     })
@@ -97,7 +102,7 @@ const likeItem = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return next({ status: BAD_REQUEST, message: "Invalid item ID format" });
+        return next({ status: BAD_REQUEST, message: MESSAGES.BAD_REQUEST });
       }
       return next(err);
     });
@@ -110,7 +115,7 @@ const dislikeItem = (req, res, next) => {
     { new: true }
   )
     .orFail(() => {
-      const error = new Error("Clothing item not found");
+      const error = new Error(MESSAGES.ITEM_NOT_FOUND);
       error.status = NOT_FOUND;
       throw error;
     })
@@ -118,7 +123,7 @@ const dislikeItem = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return next({ status: BAD_REQUEST, message: "Invalid item ID format" });
+        return next({ status: BAD_REQUEST, message: MESSAGES.BAD_REQUEST });
       }
       return next(err);
     });

@@ -9,6 +9,5 @@ module.exports = {
     SERVER_ERROR: "Internal server error",
     USER_NOT_FOUND: "User not found",
     ITEM_NOT_FOUND: "Item not found",
-    INVALID_ID: "Invalid ID format",
   },
 };
