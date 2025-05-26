@@ -118,7 +118,6 @@ module.exports = {
   createClothingItem,
   getClothingItem,
   deleteClothingItem,
-  updateClothingItem,
   likeItem,
   dislikeItem,
 };
