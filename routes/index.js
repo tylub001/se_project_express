@@ -1,4 +1,3 @@
-const express = require("express");
 const router = require("express").Router();
 const { NOT_FOUND, MESSAGES } = require("../utils/errors");
 const { createUser, login } = require("../controllers/users");

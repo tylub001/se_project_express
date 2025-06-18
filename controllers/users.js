@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
-const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 const {
   BAD_REQUEST,
@@ -17,7 +17,7 @@ const login = (req, res) => {
     return res.status(400).send({ message: "Email and password are required" });
   }
 
-  User.findUserByCredentials(email, password)
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -42,7 +42,7 @@ const createUser = async (req, res) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password) {
-   return res.status(BAD_REQUEST).json({ message: MESSAGES.BAD_REQUEST });
+    return res.status(BAD_REQUEST).json({ message: MESSAGES.BAD_REQUEST });
   }
 
   try {
