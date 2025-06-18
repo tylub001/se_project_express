@@ -1,0 +1,1 @@
+module.exports.JWT_SECRET = 'my-very-secure-secret';

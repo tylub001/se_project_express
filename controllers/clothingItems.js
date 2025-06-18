@@ -3,6 +3,7 @@ const {
   BAD_REQUEST,
   NOT_FOUND,
   SERVER_ERROR,
+  FORBIDDEN,
   MESSAGES,
 } = require("../utils/errors");
 
@@ -49,15 +50,20 @@ const getClothingItem = (req, res) => {
 };
 
 const deleteClothingItem = (req, res) => {
+  const userId = req.user._id;
   const { itemId } = req.params;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail()
-    .then((deletedItem) =>
-      res
-        .status(200)
-        .send({ message: "Item deleted successfully", deletedItem })
-    )
+    .then((item) => {
+      if (item.owner.toString() !== userId) {
+        return res.status(FORBIDDEN).json({ message: 'You do not have permission to delete this item.' });
+      }
+
+      return item.deleteOne().then(() =>
+        res.status(200).json({ message: 'Item deleted successfully', deletedItem: item })
+      );
+    })
     .catch((err) => {
       console.error(err);
 
