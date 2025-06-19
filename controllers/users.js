@@ -8,13 +8,15 @@ const {
   SERVER_ERROR,
   MESSAGES,
   CONFLICT,
+  FORBIDDEN,
+  UNAUTHORIZED,
 } = require("../utils/errors");
 
 const login = (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).send({ message: "Email and password are required" });
+    return res.status(BAD_REQUEST).send({ message: MESSAGES.BAD_REQUEST });
   }
 
   return User.findUserByCredentials(email, password)
@@ -24,18 +26,13 @@ const login = (req, res) => {
       });
       res.send({ token });
     })
-    .catch(() => {
-      res.status(401).send({ message: "Incorrect email or password" });
-    });
-};
+   .catch((err) => {
+  if (err.message === 'Incorrect email or password') {
+    return res.status(UNAUTHORIZED).send({ message: MESSAGES.UNAUTHORIZED });
+  }
 
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).json(users))
-    .catch((err) => {
-      console.error(err);
-      return res.status(SERVER_ERROR).json({ message: MESSAGES.SERVER_ERROR });
-    });
+  return res.status(SERVER_ERROR).send({ message: MESSAGES.SERVER_ERROR });
+});
 };
 
 const createUser = async (req, res) => {
@@ -116,7 +113,6 @@ const updateUserProfile = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
   createUser,
   getCurrentUser,
   login,
