@@ -8,7 +8,6 @@ const {
   SERVER_ERROR,
   MESSAGES,
   CONFLICT,
-  FORBIDDEN,
   UNAUTHORIZED,
 } = require("../utils/errors");
 
