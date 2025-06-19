@@ -57,7 +57,7 @@ const deleteClothingItem = (req, res) => {
     .orFail()
     .then((item) => {
       if (item.owner.toString() !== userId) {
-        return res.status(FORBIDDEN).json({ message: 'You do not have permission to delete this item.' });
+        return res.status(FORBIDDEN).json({ message: MESSAGES.FORBIDDEN });
       }
 
       return item.deleteOne().then(() =>

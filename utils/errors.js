@@ -4,6 +4,7 @@ module.exports = {
   SERVER_ERROR: 500,
   CONFLICT: 409,
   UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
 
   MESSAGES: {
     BAD_REQUEST: "Bad request",
@@ -13,5 +14,6 @@ module.exports = {
     ITEM_NOT_FOUND: "Item not found",
     EMAIL_CONFLICT: "A user with this email already exists",
     UNAUTHORIZED: "Incorrect email or password",
+    FORBIDDEN: "You do not have permission to perform this action."
   },
 };
