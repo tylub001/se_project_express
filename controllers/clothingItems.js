@@ -1,18 +1,18 @@
 const ClothingItem = require("../models/clothingItem");
 const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  SERVER_ERROR,
-  FORBIDDEN,
-  MESSAGES,
-} = require("../utils/errors");
+  BadRequestError,
+  NotFoundError,
+  ForbiddenError,
+} = require("../utils/custom-errors");
+const { MESSAGES } = require("../utils/errors");
 
-const getClothingItems = (req, res) => {
+
+const getClothingItems = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
     .catch((err) => {
       console.error(err);
-      return res.status(SERVER_ERROR).json({ message: MESSAGES.SERVER_ERROR });
+      next(err);
     });
 };
 
@@ -25,76 +25,69 @@ const createClothingItem = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return next({ status: BAD_REQUEST, message: MESSAGES.BAD_REQUEST });
+        return next(new BadRequestError(MESSAGES.BAD_REQUEST));
       }
-      return next({ status: SERVER_ERROR, message: MESSAGES.SERVER_ERROR });
+      next(err);
     });
 };
 
-const getClothingItem = (req, res) => {
+const getClothingItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findById(itemId)
-    .orFail()
+    .orFail(() => new NotFoundError(MESSAGES.ITEM_NOT_FOUND))
     .then((item) => res.status(200).send(item))
     .catch((err) => {
       console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).json({ message: MESSAGES.NOT_FOUND });
-      }
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).json({ message: MESSAGES.BAD_REQUEST });
+        return next(new BadRequestError(MESSAGES.BAD_REQUEST));
       }
-      return res.status(SERVER_ERROR).json({ message: MESSAGES.SERVER_ERROR });
+      next(err);
     });
 };
 
-const deleteClothingItem = (req, res) => {
+
+const deleteClothingItem = (req, res, next) => {
   const userId = req.user._id;
   const { itemId } = req.params;
 
   ClothingItem.findById(itemId)
-    .orFail()
+    .orFail(() => new NotFoundError(MESSAGES.ITEM_NOT_FOUND))
     .then((item) => {
       if (item.owner.toString() !== userId) {
-        return res.status(FORBIDDEN).json({ message: MESSAGES.FORBIDDEN });
+        return next(new ForbiddenError(MESSAGES.FORBIDDEN));
       }
 
-      return item.deleteOne().then(() =>
-        res.status(200).json({ message: 'Item deleted successfully', deletedItem: item })
-      );
+      return item
+        .deleteOne()
+        .then(() =>
+          res
+            .status(200)
+            .json({ message: "Item deleted successfully", deletedItem: item })
+        );
     })
     .catch((err) => {
       console.error(err);
-
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).json({ message: MESSAGES.ITEM_NOT_FOUND });
-      }
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).json({ message: MESSAGES.BAD_REQUEST });
+        return next(new BadRequestError(MESSAGES.BAD_REQUEST));
       }
-      return res.status(SERVER_ERROR).json({ message: MESSAGES.SERVER_ERROR });
+      next(err);
     });
 };
-
 const likeItem = (req, res, next) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
-    .orFail(() => {
-      const error = new Error(MESSAGES.ITEM_NOT_FOUND);
-      error.status = NOT_FOUND;
-      throw error;
-    })
+    .orFail(() => new NotFoundError(MESSAGES.ITEM_NOT_FOUND))
     .then((item) => res.status(200).json(item))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return next({ status: BAD_REQUEST, message: MESSAGES.BAD_REQUEST });
+        return next(new BadRequestError(MESSAGES.BAD_REQUEST));
       }
-      return next(err);
+      next(err);
     });
 };
 
@@ -104,21 +97,16 @@ const dislikeItem = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true }
   )
-    .orFail(() => {
-      const error = new Error(MESSAGES.ITEM_NOT_FOUND);
-      error.status = NOT_FOUND;
-      throw error;
-    })
+    .orFail(() => new NotFoundError(MESSAGES.ITEM_NOT_FOUND))
     .then((item) => res.status(200).json(item))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return next({ status: BAD_REQUEST, message: MESSAGES.BAD_REQUEST });
+        return next(new BadRequestError(MESSAGES.BAD_REQUEST));
       }
-      return next(err);
+      next(err);
     });
 };
-
 module.exports = {
   getClothingItems,
   createClothingItem,
