@@ -28,7 +28,7 @@ const login = (req, res, next) => {
       if (err.message === "Incorrect email or password") {
         return next(new UnauthorizedError(err.message));
       }
-      next(err); 
+      return next(err);
     });
 };
 
@@ -50,7 +50,7 @@ const createUser = async (req, res, next) => {
     const userToSend = user.toObject();
     delete userToSend.password;
 
-    res.status(201).json(userToSend);
+   return res.status(201).json(userToSend);
   } catch (err) {
     if (err.code === 11000) {
       return next(new ConflictError("A user with this email already exists"));
@@ -58,7 +58,7 @@ const createUser = async (req, res, next) => {
     if (err.name === "ValidationError") {
       return next(new BadRequestError("Invalid input data"));
     }
-    next(err);
+    return next(err);
   }
 };
 const getCurrentUser = (req, res, next) => {
@@ -71,7 +71,7 @@ const getCurrentUser = (req, res, next) => {
       if (err.name === "CastError") {
         return next(new BadRequestError("Invalid user ID format"));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -90,7 +90,7 @@ const updateUserProfile = (req, res, next) => {
       if (err.name === "ValidationError") {
         return next(new BadRequestError("Invalid input data"));
       }
-      next(err);
+      return next(err);
     });
 };
 module.exports = {

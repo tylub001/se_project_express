@@ -12,7 +12,7 @@ const getClothingItems = (req, res, next) => {
     .then((items) => res.status(200).send(items))
     .catch((err) => {
       console.error(err);
-      next(err);
+      return next(err);
     });
 };
 
@@ -27,7 +27,7 @@ const createClothingItem = (req, res, next) => {
       if (err.name === "ValidationError") {
         return next(new BadRequestError(MESSAGES.BAD_REQUEST));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -42,7 +42,7 @@ const getClothingItem = (req, res, next) => {
       if (err.name === "CastError") {
         return next(new BadRequestError(MESSAGES.BAD_REQUEST));
       }
-      next(err);
+      return next(err);
     });
 };
 
@@ -51,7 +51,7 @@ const deleteClothingItem = (req, res, next) => {
   const userId = req.user._id;
   const { itemId } = req.params;
 
-  ClothingItem.findById(itemId)
+  return ClothingItem.findById(itemId)
     .orFail(() => new NotFoundError(MESSAGES.ITEM_NOT_FOUND))
     .then((item) => {
       if (item.owner.toString() !== userId) {
@@ -71,7 +71,7 @@ const deleteClothingItem = (req, res, next) => {
       if (err.name === "CastError") {
         return next(new BadRequestError(MESSAGES.BAD_REQUEST));
       }
-      next(err);
+      return next(err);
     });
 };
 const likeItem = (req, res, next) => {
@@ -87,12 +87,12 @@ const likeItem = (req, res, next) => {
       if (err.name === "CastError") {
         return next(new BadRequestError(MESSAGES.BAD_REQUEST));
       }
-      next(err);
+      return next(err);
     });
 };
 
 const dislikeItem = (req, res, next) => {
-  ClothingItem.findByIdAndUpdate(
+  return ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
@@ -104,7 +104,7 @@ const dislikeItem = (req, res, next) => {
       if (err.name === "CastError") {
         return next(new BadRequestError(MESSAGES.BAD_REQUEST));
       }
-      next(err);
+      return next(err);
     });
 };
 module.exports = {
