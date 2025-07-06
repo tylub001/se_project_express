@@ -96,9 +96,7 @@ const dislikeItem = (req, res, next) => {
     { new: true }
   )
     .orFail(() => new NotFoundError(MESSAGES.ITEM_NOT_FOUND))
-    .then((item) => {
-      return res.status(200).json(item);
-    })
+    .then((item) => res.status(200).json(item))
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
