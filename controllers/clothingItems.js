@@ -6,7 +6,6 @@ const {
 } = require("../utils/custom-errors");
 const { MESSAGES } = require("../utils/errors");
 
-
 const getClothingItems = (req, res, next) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
@@ -45,7 +44,6 @@ const getClothingItem = (req, res, next) => {
       return next(err);
     });
 };
-
 
 const deleteClothingItem = (req, res, next) => {
   const userId = req.user._id;
@@ -98,7 +96,9 @@ const dislikeItem = (req, res, next) => {
     { new: true }
   )
     .orFail(() => new NotFoundError(MESSAGES.ITEM_NOT_FOUND))
-    .then((item) => res.status(200).json(item))
+    .then((item) => {
+      return res.status(200).json(item);
+    })
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
