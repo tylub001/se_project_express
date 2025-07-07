@@ -2,19 +2,17 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
-
-const {
-  BadRequestError,
-  NotFoundError,
-  ConflictError,
-  UnauthorizedError,
-} = require("../utils/custom-errors");
+const BadRequestError = require("../utils/BadRequestError");
+const NotFoundError = require("../utils/NotFoundError");
+const ConflictError = require("../utils/ConflictError")
+const UnauthorizedError = require("../utils/UnathorizedError")
+const { MESSAGES } = require("../utils/errors");
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return next(new BadRequestError("Email and password are required"));
+    return next(new BadRequestError(MESSAGES.BAD_REQUEST));
   }
 
   return User.findUserByCredentials(email, password)
@@ -26,7 +24,7 @@ const login = (req, res, next) => {
     })
     .catch((err) => {
       if (err.message === "Incorrect email or password") {
-        return next(new UnauthorizedError(err.message));
+        return next(new UnauthorizedError(MESSAGES.UNAUTHORIZED));
       }
       return next(err);
     });
@@ -36,12 +34,12 @@ const createUser = async (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password) {
-    return next(new BadRequestError("Email and password are required"));
+    return next(new BadRequestError(MESSAGES.BAD_REQUEST));
   }
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return next(new ConflictError("A user with this email already exists"));
+      return next(new ConflictError(MESSAGES.CONFLICT));
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -53,10 +51,10 @@ const createUser = async (req, res, next) => {
    return res.status(201).json(userToSend);
   } catch (err) {
     if (err.code === 11000) {
-      return next(new ConflictError("A user with this email already exists"));
+      return next(new ConflictError(MESSAGES.CONFLICT));
     }
     if (err.name === "ValidationError") {
-      return next(new BadRequestError("Invalid input data"));
+      return next(new BadRequestError(MESSAGES.BAD_REQUEST));
     }
     return next(err);
   }
@@ -65,11 +63,11 @@ const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
   User.findById(userId)
-    .orFail(() => new NotFoundError("User not found"))
+    .orFail(() => new NotFoundError(MESSAGES.NOT_FOUND))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === "CastError") {
-        return next(new BadRequestError("Invalid user ID format"));
+        return next(new BadRequestError(MESSAGES.BAD_REQUEST));
       }
       return next(err);
     });
@@ -84,11 +82,11 @@ const updateUserProfile = (req, res, next) => {
     { name, avatar },
     { new: true, runValidators: true }
   )
-    .orFail(() => new NotFoundError("User not found"))
+    .orFail(() => new NotFoundError(MESSAGES.NOT_FOUND))
     .then((updatedUser) => res.status(200).send(updatedUser))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return next(new BadRequestError("Invalid input data"));
+        return next(new BadRequestError(MESSAGES.BAD_REQUEST));
       }
       return next(err);
     });

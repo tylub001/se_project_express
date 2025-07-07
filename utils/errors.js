@@ -13,6 +13,7 @@ module.exports = {
     USER_NOT_FOUND: "User not found",
     ITEM_NOT_FOUND: "Item not found",
     EMAIL_CONFLICT: "A user with this email already exists",
+    CONFLICT: "A resource with the provided information already exists.",
     UNAUTHORIZED: "Incorrect email or password",
     FORBIDDEN: "You do not have permission to perform this action."
   },
