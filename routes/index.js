@@ -23,7 +23,5 @@ router.use(auth);
 router.use("/users", userRouter);
 router.use("/items", clothingItemRouter);
 
-router.use((req, res, next) => {
-  return next(new NotFoundError(MESSAGES.NOT_FOUND));
-});
+router.use((req, res, next) => next(new NotFoundError(MESSAGES.NOT_FOUND)));
 module.exports = router;
